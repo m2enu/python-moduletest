@@ -28,27 +28,35 @@ class TestCalc(unittest.TestCase):
         # built-in hex2dec
         t0 = now()
         for i in range(n):
-            [int(bufs[i:i+1], 16) for i in range(0, len(bufs), 2)]
+            decs_builtin = [int(bufs[i:i+2], 16)
+                            for i in range(0, len(bufs), 2)]
         t1 = now()
         t_builtin = deltasec(t0, t1)
 
         # c-extension hex2dec
         t0 = now()
         for i in range(n):
-            [calc.hex2dec(bufs[i:i+1]) for i in range(0, len(bufs), 2)]
+            decs_hex2dec = [calc.hex2dec(bufs[i:i+2])
+                            for i in range(0, len(bufs), 2)]
         t1 = now()
         t_extend1 = deltasec(t0, t1)
 
         # c-extension hex2decs
         t0 = now()
         for i in range(n):
-            decs = calc.hex2decs(bufs, 2048)
+            decs_hex2decs = calc.hex2decs(bufs, 2048)
         t1 = now()
         t_extend2 = deltasec(t0, t1)
 
-        #self.assertGreaterEqual(t_builtin, t_extend1)
         print '%.4f %.4f %.4f' % (t_builtin, t_extend1, t_extend2)
-        print len(decs)
+
+        self.assertEqual(len(decs_builtin), len(decs_hex2dec ))
+        self.assertEqual(len(decs_builtin), len(decs_hex2decs))
+        self.assertTrue((False not in [decs_builtin[i] == decs_hex2dec[i]
+                                       for i in range(len(decs_builtin))]))
+        self.assertTrue((False not in [decs_builtin[i] == decs_hex2decs[i]
+                                       for i in range(len(decs_builtin))]))
+        #self.assertGreaterEqual(t_builtin, t_extend1)
 
 if (__name__ == '__main__'):
     unittest.main()
